@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Para Sammy</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Montserrat:wght@200;300&display=swap" rel="stylesheet">
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Cormorant Garamond', serif;
+    background: #0a0a0a;
+    color: #f5f5f5;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  #inicio {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, #1a1a2e 0%, #0a0a0a 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 2.5s ease, visibility 2.5s ease;
+  }
+
+  #inicio.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .btn-inicio {
+    padding: 20px 50px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.9em;
+    font-weight: 200;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.8s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-inicio:hover {
+    border-color: rgba(255, 182, 193, 0.5);
+    color: rgba(255, 255, 255, 0.9);
+    letter-spacing: 6px;
+  }
+
+  #experiencia {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 3s ease;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  }
+
+  #experiencia.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  #canvas-petalos {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .contenido {
+    position: relative;
+    z-index: 10;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40px;
+  }
+
+  .titulo {
+    font-size: 4em;
+    font-weight: 300;
+    font-style: italic;
+    margin-bottom: 10px;
+    opacity: 0;
+    transform: translateY(30px);
+    color: #e8e8e8;
+    text-shadow: 0 0 40px rgba(255, 182, 193, 0.3);
+  }
+
+  .titulo.visible {
+    animation: fadeUp 1.5s ease forwards;
+  }
+
+  .subtitulo {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.8em;
+    font-weight: 200;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    color: rgba(255, 182, 193, 0.6);
+    margin-bottom: 60px;
+    opacity: 0;
+  }
+
+  .subtitulo.visible {
+    animation: fadeIn 2s ease forwards 0.8s;
+  }
+
+  .tarjeta {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 50px 60px;
+    max-width: 600px;
+    opacity: 0;
+    transform: scale(0.95);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  .tarjeta.visible {
+    animation: cardIn 1.5s ease forwards 1.5s;
+  }
+
+  .tarjeta:hover {
+    transform: scale(1.01);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 182, 193, 0.15);
+  }
+
+  .mensaje {
+    font-size: 1.3em;
+    line-height: 2;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .mensaje .acento {
+    color: #ffb6c1;
+    font-style: italic;
+    position: relative;
+  }
+
+  .controles {
+    margin-top: 50px;
+    display: flex;
+    gap: 30px;
+    opacity: 0;
+  }
+
+  .controles.visible {
+    animation: fadeIn 1s ease forwards 3s;
+  }
+
+  .control-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: all 0.4s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1em;
+  }
+
+  .control-btn:hover {
+    border-color: rgba(255, 182, 193, 0.4);
+    background: rgba(255, 182, 193, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+  }
+
+  .audio-indicador {
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    transition: opacity 1s ease;
+    z-index: 100;
+  }
+
+  .audio-indicador.visible {
+    opacity: 0.5;
+  }
+
+  .onda {
+    width: 2px;
+    height: 15px;
+    background: rgba(255, 182, 193, 0.6);
+    animation: onda 1.2s ease-in-out infinite;
+  }
+
+  .onda:nth-child(2) { animation-delay: 0.1s; height: 20px; }
+  .onda:nth-child(3) { animation-delay: 0.2s; height: 12px; }
+  .onda:nth-child(4) { animation-delay: 0.3s; height: 18px; }
+
+  @keyframes onda {
+    0%, 100% { transform: scaleY(0.6); opacity: 0.4; }
+    50% { transform: scaleY(1); opacity: 1; }
+  }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+
+  @keyframes cardIn {
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @media (max-width: 768px) {
+    .titulo { font-size: 2.5em; }
+    .tarjeta { padding: 30px; margin: 20px; }
+    .mensaje { font-size: 1.1em; }
+  }
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<div id="inicio">
+  <button class="btn-inicio" onclick="iniciar()">Amorcito</button>
+</div>
+
+<div id="experiencia">
+  <canvas id="canvas-petalos"></canvas>
+
+  <div class="contenido">
+    <h1 class="titulo">Para mi Sammy</h1>
+    <p class="subtitulo">Rizitos de mi vida</p>
+
+    <div class="tarjeta">
+      <p class="mensaje">
+        Desde que llegaste a mi vida, todo se siente <span class="acento">más bonito</span>, más real. 
+        Cada momento contigo vale más de lo que las palabras pueden expresar.
+        <br><br>
+        Eres mi <span class="acento">paz</span>, mi <span class="acento">motivación</span> y la razón 
+        por la que quiero ser mejor cada día.
+      </p>
+    </div>
+
+    <div class="controles">
+      <button class="control-btn" onclick="masPetalos()" title="Más pétalos">+</button>
+      <button class="control-btn" onclick="cambiarAmbiente()" title="Cambiar luz">◐</button>
+      <button class="control-btn" onclick="pausarAudio()" title="Pausar música">♪</button>
+    </div>
+  </div>
+
+  <div class="audio-indicador" id="audioIndicador">
+    <div class="onda"></div>
+    <div class="onda"></div>
+    <div class="onda"></div>
+    <div class="onda"></div>
+  </div>
+</div>
+
+<!-- Audio element para tu música personalizada -->
+<audio id="musicaPersonal" loop preload="auto"></audio>
+
+<script>
+let audioCtx;
+let osciladores = [];
+let gananciaMaster;
+let musicaActiva = false;
+let petalos = [];
+let canvas, ctx;
+let animationId;
+let temaActual = 0;
+let musicaPersonal;
+
+const CONFIG_MUSICA = {
+  url: "eres.mp3",
+  volumen: 0.4
+};
+
+const temas = [
+  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+  'linear-gradient(135deg, #2d1b2e 0%, #1a1a2e 50%, #16213e 100%)',
+  'linear-gradient(135deg, #1e2a3a 0%, #0f2027 50%, #203a43 100%)'
+];
+
+class Petalo {
+  constructor(x, y, tipo = 'caida') {
+    this.x = x || Math.random() * canvas.width;
+    this.y = y || -50;
+    this.size = Math.random() * 15 + 10;
+    this.tipo = tipo;
+
+    this.angle = Math.random() * Math.PI * 2;
+    this.spinSpeed = (Math.random() - 0.5) * 0.02;
+
+    this.speedY = Math.random() * 1.5 + 0.5;
+    this.speedX = Math.random() * 2 - 1;
+    this.sway = Math.random() * 0.02;
+    this.swayOffset = Math.random() * Math.PI * 2;
+
+    const tonos = [
+      {r: 255, g: 182, b: 193},
+      {r: 255, g: 192, b: 203},
+      {r: 219, g: 112, b: 147},
+      {r: 255, g: 160, b: 122}
+    ];
+    this.color = tonos[Math.floor(Math.random() * tonos.length)];
+    this.alpha = Math.random() * 0.4 + 0.3;
+  }
+
+  update(time) {
+    this.y += this.speedY;
+    this.x += this.speedX + Math.sin(time * this.sway + this.swayOffset) * 0.5;
+    this.angle += this.spinSpeed;
+
+    if (this.y > canvas.height + 50) {
+      this.y = -50;
+      this.x = Math.random() * canvas.width;
+    }
+    if (this.x > canvas.width + 50) this.x = -50;
+    if (this.x < -50) this.x = canvas.width + 50;
+  }
+
+  draw() {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
+
+    ctx.beginPath();
+    ctx.moveTo(0, -this.size);
+
+    ctx.bezierCurveTo(
+      -this.size * 0.6, -this.size * 0.3,
+      -this.size * 0.6, this.size * 0.3,
+      0, this.size
+    );
+
+    ctx.bezierCurveTo(
+      this.size * 0.6, this.size * 0.3,
+      this.size * 0.6, -this.size * 0.3,
+      0, -this.size
+    );
+
+    ctx.closePath();
+
+    const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size);
+    gradient.addColorStop(0, `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.alpha})`);
+    gradient.addColorStop(0.7, `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.alpha * 0.6})`);
+    gradient.addColorStop(1, `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 0)`);
+
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(0, -this.size * 0.8);
+    ctx.lineTo(0, this.size * 0.8);
+    ctx.strokeStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.alpha * 0.3})`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+}
+
+function initCanvas() {
+  canvas = document.getElementById('canvas-petalos');
+  ctx = canvas.getContext('2d');
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  for (let i = 0; i < 25; i++) {
+    petalos.push(new Petalo());
+  }
+}
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+
+function animate(time) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  petalos.forEach(petalo => {
+    petalo.update(time * 0.001);
+    petalo.draw();
+  });
+
+  animationId = requestAnimationFrame(animate);
+}
+
+function initAudio() {
+  // Inicializar música personalizada
+  musicaPersonal = document.getElementById('musicaPersonal');
+  musicaPersonal.src = CONFIG_MUSICA.url;
+  musicaPersonal.volume = CONFIG_MUSICA.volumen;
+
+  // Intentar reproducir la música personalizada
+  musicaPersonal.play().then(() => {
+    console.log("Música personalizada iniciada");
+  }).catch(err => {
+    console.log("No se pudo iniciar música automáticamente:", err);
+  });
+
+  // Mantener el audio ambiental de respaldo (opcional, puedes quitarlo si solo quieres tu música)
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  const config = [
+    { tipo: 'sine', freq: 261.63, vol: 0.03 },
+    { tipo: 'sine', freq: 329.63, vol: 0.02 },
+    { tipo: 'triangle', freq: 196.00, vol: 0.02 }
+  ];
+
+  gananciaMaster = audioCtx.createGain();
+  gananciaMaster.gain.setValueAtTime(0, audioCtx.currentTime);
+  gananciaMaster.connect(audioCtx.destination);
+
+  config.forEach((cfg, i) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = cfg.tipo;
+    osc.frequency.setValueAtTime(cfg.freq, audioCtx.currentTime);
+
+    const lfo = audioCtx.createOscillator();
+    const lfoGain = audioCtx.createGain();
+    lfo.frequency.setValueAtTime(0.1 + i * 0.05, audioCtx.currentTime);
+    lfoGain.gain.setValueAtTime(2, audioCtx.currentTime);
+    lfo.connect(lfoGain);
+    lfoGain.connect(osc.frequency);
+    lfo.start();
+
+    gain.gain.setValueAtTime(cfg.vol, audioCtx.currentTime);
+    osc.connect(gain);
+    gain.connect(gananciaMaster);
+    osc.start();
+
+    osciladores.push({ osc, gain, lfo, lfoGain, freqBase: cfg.freq });
+  });
+
+  gananciaMaster.gain.linearRampToValueAtTime(0.08, audioCtx.currentTime + 4);
+
+  setInterval(() => {
+    if (!musicaActiva) return;
+
+    osciladores.forEach((o, i) => {
+      const variacion = (Math.random() - 0.5) * 4;
+      const nuevaFreq = o.freqBase + variacion;
+      o.osc.frequency.setTargetAtTime(nuevaFreq, audioCtx.currentTime, 3);
+    });
+  }, 8000);
+
+  musicaActiva = true;
+}
+
+function pausarAudio() {
+  // Pausar/Reanudar música personalizada
+  if (musicaPersonal) {
+    if (musicaPersonal.paused) {
+      musicaPersonal.play();
+    } else {
+      musicaPersonal.pause();
+    }
+  }
+
+  // También controlar el audio ambiental
+  if (!audioCtx) return;
+
+  if (musicaActiva) {
+    gananciaMaster.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1);
+    musicaActiva = false;
+  } else {
+    gananciaMaster.gain.linearRampToValueAtTime(0.08, audioCtx.currentTime + 1);
+    musicaActiva = true;
+  }
+}
+
+function iniciar() {
+  initAudio();
+
+  document.getElementById('inicio').classList.add('hidden');
+
+  setTimeout(() => {
+    document.getElementById('experiencia').classList.add('active');
+
+    initCanvas();
+    animate(0);
+
+    document.querySelector('.titulo').classList.add('visible');
+    document.querySelector('.subtitulo').classList.add('visible');
+    document.querySelector('.tarjeta').classList.add('visible');
+    document.querySelector('.controles').classList.add('visible');
+    document.getElementById('audioIndicador').classList.add('visible');
+
+  }, 500);
+}
+
+function masPetalos() {
+  for (let i = 0; i < 10; i++) {
+    setTimeout(() => {
+      petalos.push(new Petalo(Math.random() * canvas.width, -20));
+    }, i * 100);
+  }
+
+  if (audioCtx && musicaActiva) {
+    const campana = audioCtx.createOscillator();
+    const gainCampana = audioCtx.createGain();
+    campana.type = 'sine';
+    campana.frequency.setValueAtTime(880, audioCtx.currentTime);
+    campana.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 2);
+    gainCampana.gain.setValueAtTime(0.05, audioCtx.currentTime);
+    gainCampana.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2);
+    campana.connect(gainCampana);
+    gainCampana.connect(audioCtx.destination);
+    campana.start();
+    campana.stop(audioCtx.currentTime + 2);
+  }
+}
+
+function cambiarAmbiente() {
+  temaActual = (temaActual + 1) % temas.length;
+  document.getElementById('experiencia').style.background = temas[temaActual];
+
+  petalos.forEach(p => {
+    p.alpha = Math.random() * 0.3 + 0.2;
+  });
+}
+
+let lastMouseTime = 0;
+document.addEventListener('mousemove', (e) => {
+  const ahora = Date.now();
+  if (ahora - lastMouseTime > 200 && document.getElementById('experiencia').classList.contains('active')) {
+    if (Math.random() > 0.7) {
+      petalos.push(new Petalo(e.clientX, e.clientY));
+      if (petalos.length > 60) petalos.shift();
+    }
+    lastMouseTime = ahora;
+  }
+});
+</script>
+
+</body>
+</html>
